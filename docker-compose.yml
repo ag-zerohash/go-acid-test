@@ -1,0 +1,28 @@
+version: "3.9"
+
+name: go-acid-test
+
+services:
+  go_acid_test:
+    build:
+      context: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_DSN: "postgres://postgres:postgres@postgres/acid_test?sslmode=disable"
+
+  postgres:
+    image: docker.infra.seedcx.net/postgres:14
+    restart: unless-stopped
+    ports:
+      - 5432
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: "5s"
+      timeout: "10s"
+      retries: 5
+    environment:
+      POSTGRES_DB: "acid_test"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
